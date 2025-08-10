@@ -1,0 +1,297 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>StockBuzz - Secure Inventory Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CryptoJS for AES encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="./styles/styles.css"
+    />
+  </head>
+  <body class="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen">
+    <!-- Login Form -->
+    <div
+      id="login-container"
+      class="flex items-center justify-center min-h-screen"
+    >
+      <div
+        class="max-w-md w-full bg-white shadow-2xl rounded-lg px-8 pt-6 pb-8 mb-4 transform transition-all duration-500 ease-in-out hover:scale-105"
+      >
+        <h3 class="text-center text-3xl font-extrabold mb-6 text-blue-600">StockBuzz Login</h3>
+        <form id="login-form">
+          <div class="mb-4">
+            <label
+              for="username"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Username</label
+            >
+            <input
+              type="text"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="username"
+              required
+            />
+          </div>
+          <div class="mb-6">
+            <label
+              for="password"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Password</label
+            >
+            <input
+              type="password"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="password"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-200"
+          >
+            Login
+          </button>
+        </form>
+        <div
+          id="login-alert"
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4 hidden"
+          role="alert"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div
+      id="dashboard"
+      class="hidden px-4 py-6"
+    >
+      <nav class="bg-blue-700 text-white p-4 rounded-lg shadow-md mb-6">
+        <div class="flex justify-between items-center">
+          <a
+            class="text-2xl font-bold"
+            href="#"
+            >StockBuzz</a
+          >
+          <div class="flex items-center">
+            <span class="mr-4"
+              >Role:
+              <span
+                id="user-role"
+                class="font-semibold"
+              ></span
+            ></span>
+            <button
+              id="logout"
+              class="bg-transparent hover:bg-blue-500 text-white font-semibold hover:text-white py-2 px-4 border border-white hover:border-transparent rounded transition duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="bg-white shadow-2xl rounded-lg px-8 pt-6 pb-8 mb-4">
+        <div class="flex justify-between items-center mb-6">
+          <h4 class="text-2xl font-bold text-gray-800">Inventory Management</h4>
+          <button
+            id="add-item-btn"
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-200 hidden"
+          >
+            Add Item
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-blue-100 p-4 rounded-lg shadow-md">
+            <h5 class="text-lg font-semibold">Total Items</h5>
+            <p
+              id="total-items"
+              class="text-3xl font-bold"
+            >
+              0
+            </p>
+          </div>
+          <div class="bg-green-100 p-4 rounded-lg shadow-md">
+            <h5 class="text-lg font-semibold">Total Quantity</h5>
+            <p
+              id="total-quantity"
+              class="text-3xl font-bold"
+            >
+              0
+            </p>
+          </div>
+          <div class="bg-yellow-100 p-4 rounded-lg shadow-md">
+            <h5 class="text-lg font-semibold">Low Stock Items</h5>
+            <p
+              id="low-stock"
+              class="text-3xl font-bold"
+            >
+              0
+            </p>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+          <input
+            type="text"
+            id="search-input"
+            class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            placeholder="Search by Product Name..."
+          />
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+            <thead class="bg-blue-700 text-white">
+              <tr>
+                <th
+                  class="py-3 px-4 border-b cursor-pointer"
+                  data-sort="id"
+                >
+                  ID
+                </th>
+                <th
+                  class="py-3 px-4 border-b cursor-pointer"
+                  data-sort="productName"
+                >
+                  Product Name
+                </th>
+                <th
+                  class="py-3 px-4 border-b cursor-pointer"
+                  data-sort="supplier"
+                >
+                  Supplier (Encrypted)
+                </th>
+                <th
+                  class="py-3 px-4 border-b cursor-pointer"
+                  data-sort="price"
+                >
+                  Price (Encrypted)
+                </th>
+                <th
+                  class="py-3 px-4 border-b cursor-pointer"
+                  data-sort="quantity"
+                >
+                  Quantity
+                </th>
+                <th class="py-3 px-4 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody
+              id="inventory-table"
+              class="text-gray-700"
+            ></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item Modal for Add/Edit -->
+    <div
+      id="item-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden transition-opacity duration-300"
+    >
+      <div class="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full transform transition-all duration-300 scale-95">
+        <div class="flex justify-between items-center mb-4">
+          <h5
+            class="text-2xl font-bold text-gray-800"
+            id="modal-title"
+          >
+            Add Item
+          </h5>
+          <button
+            id="close-modal"
+            class="text-gray-500 hover:text-gray-700 text-3xl"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="item-form">
+          <input
+            type="hidden"
+            id="item-id"
+          />
+          <div class="mb-4">
+            <label
+              for="product-name"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Product Name</label
+            >
+            <input
+              type="text"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="product-name"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="supplier"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Supplier</label
+            >
+            <input
+              type="text"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="supplier"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="price"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Price</label
+            >
+            <input
+              type="number"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="price"
+              step="0.01"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="quantity"
+              class="block text-gray-700 text-sm font-bold mb-2"
+              >Quantity</label
+            >
+            <input
+              type="number"
+              class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              id="quantity"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-200"
+          >
+            Save
+          </button>
+        </form>
+        <div
+          id="item-alert"
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4 hidden"
+          role="alert"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+  </body>
+</html>
